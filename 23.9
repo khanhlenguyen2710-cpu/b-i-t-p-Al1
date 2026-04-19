@@ -1,0 +1,11 @@
+from sklearn.cluster import KMeans
+import numpy as np
+
+# Dữ liệu vị trí khách hàng giả lập
+X = np.random.randn(50, 2) * 0.01 + [10.77, 106.70]
+
+# Phân thành 3 cụm để đặt 3 kho hàng
+kmeans = KMeans(n_clusters=3).fit(X)
+centers = kmeans.cluster_centers_
+
+print("Vị trí tối ưu để đặt 3 kho hàng là:", centers)
