@@ -1,0 +1,34 @@
+import folium
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
+
+# 1. Khởi tạo bộ chuyển đổi địa chỉ
+geolocator = Nominatim(user_agent="my_app")
+
+# 2. Danh sách 10 địa chỉ giả lập tại TP.HCM
+addresses = [
+    "Dinh Độc Lập, Quận 1, TP.HCM", "Chợ Bến Thành, Quận 1, TP.HCM",
+    "Nhà thờ Đức Bà, Quận 1, TP.HCM", "Landmark 81, Bình Thạnh, TP.HCM",
+    "Thảo Cầm Viên, Quận 1, TP.HCM", "Đại học Bách Khoa, Quận 10, TP.HCM",
+    "Bảo tàng Chứng tích Chiến tranh, Quận 3, TP.HCM", "Hồ Con Rùa, Quận 3, TP.HCM",
+    "Cầu Ánh Sao, Quận 7, TP.HCM", "Phố đi bộ Nguyễn Huệ, Quận 1, TP.HCM"
+]
+
+# Điểm trung tâm (Ví dụ: Ủy ban Nhân dân TP.HCM)
+center_point = (10.7765, 106.7009)
+m = folium.Map(location=center_point, zoom_start=13)
+folium.Marker(center_point, popup="Trung tâm", icon=folium.Icon(color='red')).add_to(m)
+
+# 3. Chuyển đổi và vẽ lên bản đồ
+for addr in addresses:
+    location = geolocator.geocode(addr)
+    if location:
+        point = (location.latitude, location.longitude)
+        dist = geodesic(center_point, point).km
+        
+        # Vẽ marker và đường nối
+        folium.Marker(point, popup=f"{addr}\nCách trung tâm: {dist:.2f} km").add_to(m)
+        folium.PolyLine([center_point, point], color="blue", weight=1, opacity=0.5).add_to(m)
+
+m.save("bai_23_2.html")
+print("Đã tạo xong bản đồ bài 23.2")
