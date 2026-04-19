@@ -1,0 +1,10 @@
+from scipy.spatial import distance
+
+customers = [(10.77, 106.69), (10.78, 106.70)]
+drivers = [(10.75, 106.68), (10.79, 106.71)]
+
+for i, cust in enumerate(customers):
+    # Tính khoảng cách từ khách tới tất cả tài xế
+    dists = [distance.euclidean(cust, d) for d in drivers]
+    closest_driver_idx = dists.index(min(dists))
+    print(f"Khách {i} được gán cho Tài xế {closest_driver_idx}")
