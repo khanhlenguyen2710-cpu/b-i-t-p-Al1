@@ -1,0 +1,19 @@
+import folium
+from shapely.geometry import Point
+import geopandas as gpd
+
+center = [10.7765, 106.7009] # TP.HCM
+m = folium.Map(location=center, zoom_start=12)
+
+# Vẽ các vòng bán kính 3km, 5km, 10km
+for radius in [3000, 5000, 10000]:
+    folium.Circle(
+        location=center,
+        radius=radius,
+        color='blue',
+        fill=True,
+        fill_opacity=0.1,
+        popup=f"Vùng {radius/1000}km"
+    ).add_to(m)
+
+m.save("service_area.html")
