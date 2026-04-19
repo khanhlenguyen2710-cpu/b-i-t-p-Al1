@@ -1,0 +1,17 @@
+import folium
+from folium.plugins import HeatMap
+import numpy as np
+
+# 1. Giả lập 100 điểm dữ liệu khách hàng quanh khu vực TP.HCM
+base_lat, base_lon = 10.7765, 106.7009
+data = np.random.randn(100, 2) * 0.02 + [base_lat, base_lon]
+data = data.tolist()
+
+# 2. Tạo bản đồ
+m_heat = folium.Map(location=[base_lat, base_lon], zoom_start=13)
+
+# 3. Thêm lớp HeatMap
+HeatMap(data).add_to(m_heat)
+
+m_heat.save("bai_23_3.html")
+print("Đã tạo xong bản đồ nhiệt bài 23.3")
