@@ -1,0 +1,15 @@
+import geopandas as gpd
+import matplotlib.pyplot as plt
+
+# 1. Đọc dữ liệu ranh giới (thường là file .shp hoặc GeoJSON)
+# Bạn có thể tải file ranh giới hành chính Việt Nam trên mạng
+world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+asia = world[world.continent == 'Asia']
+
+# 2. Giả lập dữ liệu doanh thu
+asia['revenue'] = [i*10 for i in range(len(asia))]
+
+# 3. Vẽ bản đồ Choropleth
+asia.plot(column='revenue', cmap='OrRd', legend=True)
+plt.title("Bản đồ doanh thu khu vực Châu Á")
+plt.show()
