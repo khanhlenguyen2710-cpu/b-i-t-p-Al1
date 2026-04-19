@@ -1,0 +1,14 @@
+import osmnx as ox
+import networkx as nx
+
+# 1. Tải mạng lưới đường bộ (ví dụ Quận 1, TP.HCM)
+place_name = "District 1, Ho Chi Minh City, Vietnam"
+graph = ox.graph_from_place(place_name, network_type='drive')
+
+# 2. Tìm đường đi ngắn nhất giữa 2 nút (Dijkstra)
+nodes = list(graph.nodes())
+orig, dest = nodes[0], nodes[-1]
+route = nx.shortest_path(graph, orig, dest, weight='length')
+
+# 3. Trực quan hóa
+ox.plot_graph_route(graph, route)
