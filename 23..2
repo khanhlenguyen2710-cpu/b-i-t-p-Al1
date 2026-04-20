@@ -1,0 +1,96 @@
+import folium
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
+import pandas as pd
+import time
+
+# 1. Thiết lập bộ máy tìm kiếm tọa độ (Nominatim)
+# user_agent giúp định danh ứng dụng của bạn để tránh bị chặn
+geolocator = Nominatim(user_agent="ueh_spatial_analysis")
+
+# 2. Xác định điểm trung tâm (Ví dụ: UEH Cơ sở A)
+center_address = "59C Nguyễn Đình Chiểu, Quận 3, Thành phố Hồ Chí Minh"
+location_center = geolocator.geocode(center_address)
+
+# Thêm kiểm tra lỗi tại đây
+if location_center is None:
+    print(f"Lỗi: Không tìm thấy tọa độ cho địa chỉ trung tâm: {center_address}. Vui lòng kiểm tra lại địa chỉ hoặc thử lại.")
+    # Có thể thoát hoặc đặt một tọa độ mặc định
+    center_coords = (10.7828, 106.6958) # Tọa độ mặc định của UEH cơ sở A nếu không tìm thấy
+    print(f"Sử dụng tọa độ mặc định: {center_coords}")
+else:
+    center_coords = (location_center.latitude, location_center.longitude)
+
+# 3. Giả lập/Thu thập danh sách 10 địa chỉ cụ thể tại TP.HCM
+addresses = [
+    "Dinh Độc Lập, Quận 1",
+    "Chợ Bến Thành, Quận 1",
+    "Nhà thờ Đức Bà, Quận 1",
+    "Thảo Cầm Viên, Quận 1",
+    "Landmark 81, Bình Thạnh",
+    "Bitexco Financial Tower, Quận 1",
+    "Bảo tàng Chứng tích Chiến tranh, Quận 3",
+    "Hồ Con Rùa, Quận 3",
+    "Công viên Tao Đàn, Quận 1",
+    "Nhà hát Thành phố, Quận 1"
+]
+
+# 4. Xử lý dữ liệu: Geocoding và tính khoảng cách
+data = []
+print("Đang xử lý địa chỉ...")
+
+for addr in addresses:
+    # Tìm tọa độ của địa chỉ
+    # Thêm "Thành phố Hồ Chí Minh" để kết quả chính xác hơn
+    loc = geolocator.geocode(addr + ", Thành phố Hồ Chí Minh")
+
+    if loc:
+        point_coords = (loc.latitude, loc.longitude)
+        # Tính khoảng cách từ điểm này đến trung tâm (đơn vị: km)
+        distance = geodesic(center_coords, point_coords).km
+
+        data.append({
+            "Địa điểm": addr,
+            "Tọa độ": point_coords,
+            "Khoảng cách (km)": round(distance, 2)
+        })
+
+    # Nghỉ 1 giây giữa các lần gọi API để tuân thủ chính sách của Nominatim
+    time.sleep(1)
+
+# 5. Trực quan hóa bằng Folium
+# Khởi tạo bản đồ tại vị trí trung tâm
+m = folium.Map(location=center_coords, zoom_start=15, tiles='OpenStreetMap')
+
+# Thêm Marker cho điểm trung tâm (UEH)
+folium.Marker(
+    location=center_coords,
+    popup="ĐIỂM TRUNG TÂM: UEH",
+    icon=folium.Icon(color='red', icon='university', prefix='fa')
+).add_to(m)
+
+# Thêm các địa điểm còn lại và vẽ đường nối (Spatial Relationship)
+for item in data:
+    # Đánh dấu vị trí địa điểm
+    folium.Marker(
+        location=item["Tọa độ"],
+        popup=f"{item['Địa điểm']}<br>Khoảng cách: {item['Khoảng cách (km)']} km",
+        icon=folium.Icon(color='blue', icon='info-sign')
+    ).add_to(m)
+
+    # Vẽ đường thẳng nối từ địa điểm về trung tâm để thấy mối quan hệ không gian
+    folium.PolyLine(
+        locations=[center_coords, item["Tọa độ"]],
+        color='gray',
+        weight=1,
+        dash_array='5', # Tạo đường nét đứt
+        opacity=0.6
+    ).add_to(m)
+
+# Hiển thị bảng dữ liệu tóm tắt (tùy chọn)
+df = pd.DataFrame(data)
+print("\nBảng thống kê khoảng cách:")
+print(df)
+
+# Hiển thị bản đồ
+m
